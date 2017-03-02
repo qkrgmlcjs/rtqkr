@@ -1,14 +1,11 @@
+#!/usr/bin/env Rscript
 ## load packges
-if (!require("googlesheets")) install.packages("googlesheets")
-if (!require("lubridate")) install.packages("lubridate")
-if (!require("devtools")) install.packages("devtools")
-if (!require("slackr")) devtools::install_github("mrchypark/slackr")
-if (!require("rvest")) install.packages("rvest")
-require(rvest)
-require(lubridate)
-require(googlesheets)
-require(slackr)
-require(xml2)
+if (!require("googlesheets")) {install.packages("googlesheets") }
+if (!require("lubridate")) {install.packages("lubridate") }
+if (!require("devtools")) {install.packages("devtools")}
+if (!require("slackr")) {devtools::install_github("mrchypark/slackr")}
+if (!require("xml2")) {install.packages("xml2") }
+if (!require("rvest")) {install.packages("rvest")}
 
 ## load get data func
 
@@ -53,8 +50,8 @@ if(class(workSpace)[1]=="try-error") {
 datetime <- now()
 
 rtData <- rbind(data.frame(datetime = datetime, source= "daum",rank=1:10,keyword=daum(),stringsAsFactors = F),
-               data.frame(datetime = datetime, source= "naver",rank=1:20,keyword=naver(),stringsAsFactors = F),
-               data.frame(datetime = datetime, source= "zum",rank=1:20,keyword=zum(),stringsAsFactors = F))
+                data.frame(datetime = datetime, source= "naver",rank=1:20,keyword=naver(),stringsAsFactors = F),
+                data.frame(datetime = datetime, source= "zum",rank=1:20,keyword=zum(),stringsAsFactors = F))
 
 for (i in 1:nrow(rtData)) {
   workSpace <- gs_add_row(ss=workSpace, input = (rtData[i,]))
