@@ -55,7 +55,7 @@ if(class(workSpace)[1]!="googlesheet"){
 }
 
 ## get data
-datetime <- now()
+datetime <- as.POSIXlt(now()-3*60*60,tz="KST")
 
 rtData <- rbind(data.frame(datetime = datetime, source= "daum",rank=1:10,keyword=daum()),
                 data.frame(datetime = datetime, source= "naver",rank=1:20,keyword=naver()),
@@ -78,6 +78,10 @@ load("/home/rstudio/realtimeQueryKeywordKr/web_hook.RData")
 
 if(i==50){
   cont = paste0(datetime,"의 데이터 업로드가 완료되었습니다.")
-  POST(web_hook,body=list(text=iconv(cont,to="UTF-8")),encode="json")
+  report <- try(POST(web_hook,body=list(text=iconv(cont,to="UTF-8")),encode="json"))
+  while(report[1]=="Error in curl::curl_fetch_memory(url, handle = handle) : \n  Timeout was reached\n"){
+    report <- try(POST(web_hook,body=list(text=iconv(cont,to="UTF-8")),encode="json"))
+    Sys.sleep(0.3)
+  }
 }
 
