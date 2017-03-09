@@ -1,8 +1,9 @@
 ## load packges
+
 if (!require("googlesheets")) {install.packages("googlesheets") }
+if (!require("httr")) {install.packages("httr") }
 if (!require("lubridate")) {install.packages("lubridate") }
-if (!require("devtools")) {install.packages("devtools")}
-if (!require("slackr")) {devtools::install_github("mrchypark/slackr")}
+
 
 ## load get data func
 
@@ -33,16 +34,24 @@ daum <-function(){
   return(daum)
 }
 
-print("function loaded.")
-
 dataForm <- data.frame(datetime=NA,source=NA,rank=NA,keyword=NA)
 # dataForm <- dataForm[-1,]
 
 ## check and create today's sheet.
-workSpace <- try(gs_title(paste0("rtqk_",today())),silent = T)
-if(class(workSpace)[1]=="try-error") {
-  gs_new(title = paste0("rtqk_",today()),input=dataForm)
-  workSpace <- try(gs_title(paste0("rtqk_", today())),silent = T)
+workSpace <- try(gs_title(paste0("rtqk_",today())))
+
+while(workSpace[1]=="Error in curl::curl_fetch_memory(url, handle = handle) : \n  Timeout was reached\n"){
+  
+  workSpace <- try(gs_title(paste0("rtqk_",today())))
+  Sys.sleep(0.3)
+  
+}
+
+if(class(workSpace)[1]!="googlesheet"){
+  if(grep("Error in gs_lookup",workSpace)==1) {
+    gs_new(title = paste0("rtqk_",today()),input=dataForm)
+    workSpace <- try(gs_title(paste0("rtqk_", today())))
+  }
 }
 
 ## get data
@@ -56,9 +65,15 @@ for (i in 1:nrow(rtData)) {
   workSpace <- gs_add_row(ss=workSpace, input = (rtData[i,]))
   Sys.sleep(0.3)
 }
+
 rm(rtData)
 
-## reference https://dyerlab.ces.vcu.edu/2016/07/08/collab-slack-r/
+# web_hook = "https://hooks.slack.com/services/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"
+# save(web_hook,file="web_hook.RData")
+load("/home/rstudio/realtimeQueryKeywordKr/web_hook.RData")
 
-slackr_setup()
-slackr_bot("data is up.")
+if(i==50){
+  cont = paste0(datetime,"의 데이터 업로드가 완료되었습니다.")
+  POST(web_hook,body=list(text=iconv(cont,to="UTF-8")),encode="json")
+}
+

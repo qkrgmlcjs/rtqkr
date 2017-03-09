@@ -1,0 +1,4 @@
+SHELL=/bin/bash
+PATH=/usr/local/bin/:/sbin:/bin:/usr/sbin:/usr/bin
+
+*/5 * * * * cd /home/rstudio/realtimeQueryKeywordKr/ && Rscript toGoogleSheet.R 2> e1.log
