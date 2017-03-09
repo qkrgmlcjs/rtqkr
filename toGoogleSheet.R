@@ -62,13 +62,17 @@ rtData <- rbind(data.frame(datetime = datetime, source= "daum",rank=1:10,keyword
                 data.frame(datetime = datetime, source= "zum",rank=1:20,keyword=zum()))
 
 for (i in 1:nrow(rtData)) {
-  workSpace <- gs_add_row(ss=workSpace, input = (rtData[i,]))
+  workSpace <- try(gs_add_row(ss=workSpace, input = (rtData[i,])))
+  while(workSpace[1]=="Error in curl::curl_fetch_memory(url, handle = handle) : \n  Timeout was reached\n"){
+    workSpace <- try(gs_add_row(ss=workSpace, input = (rtData[i,])))
+    Sys.sleep(0.3)
+  }
   Sys.sleep(0.3)
 }
 
 rm(rtData)
 
-# web_hook = "https://hooks.slack.com/services/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"
+# web_hook = "https://hooks.slack.com/services/XXXXXXXXXXXXXXXXXXXX"
 # save(web_hook,file="web_hook.RData")
 load("/home/rstudio/realtimeQueryKeywordKr/web_hook.RData")
 
