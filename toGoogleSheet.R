@@ -55,7 +55,7 @@ if(class(workSpace)[1]!="googlesheet"){
 }
 
 ## get data
-datetime <- as.POSIXlt(now()+3*60*60,tz="KST")
+datetime <- as.POSIXlt(now()+9*60*60,tz="KST")
 
 rtData <- rbind(data.frame(datetime = datetime, source= "daum",rank=1:10,keyword=daum()),
                 data.frame(datetime = datetime, source= "naver",rank=1:20,keyword=naver()),
