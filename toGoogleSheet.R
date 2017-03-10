@@ -71,9 +71,9 @@ for (i in 1:nrow(rtData)) {
   workSpace <- try(gs_add_row(ss=workSpace, input = (rtData[i,])))
   while(workSpace[1]=="Error in curl::curl_fetch_memory(url, handle = handle) : \n  Timeout was reached\n"){
     workSpace <- try(gs_add_row(ss=workSpace, input = (rtData[i,])))
-    Sys.sleep(0.3)
+    Sys.sleep(0.1)
   }
-  Sys.sleep(0.3)
+  Sys.sleep(0.1)
 }
 
 rm(rtData)
