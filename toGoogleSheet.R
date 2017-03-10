@@ -56,8 +56,22 @@ while(workSpace[1]=="Error in curl::curl_fetch_memory(url, handle = handle) : \n
 
 if(class(workSpace)[1]!="googlesheet"){
   if(grep("Error in gs_lookup",workSpace)==1) {
-    gs_new(title = paste0("rtqk_",gsname),input=dataForm)
+    workSpace <- try(gs_new(title = paste0("rtqk_",gsname),input=dataForm))
+    while(workSpace[1]=="Error in curl::curl_fetch_memory(url, handle = handle) : \n  Timeout was reached\n"){
+      workSpace <- try(gs_new(title = paste0("rtqk_",gsname),input=dataForm))
+      Sys.sleep(0.3)
+    }
     workSpace <- try(gs_title(paste0("rtqk_", gsname)))
+    while(workSpace[1]=="Error in curl::curl_fetch_memory(url, handle = handle) : \n  Timeout was reached\n"){
+      workSpace <- try(gs_title(paste0("rtqk_",gsname)))
+      Sys.sleep(0.3)
+    }
+    cont = paste0("새 파일이 생성되었습니다. 공유 설정을 진행해 주세요.")
+    report <- try(POST(web_hook,body=list(text=iconv(cont,to="UTF-8")),encode="json"))
+    while(report[1]=="Error in curl::curl_fetch_memory(url, handle = handle) : \n  Timeout was reached\n"){
+      report <- try(POST(web_hook,body=list(text=iconv(cont,to="UTF-8")),encode="json"))
+      Sys.sleep(0.3)
+    }
   }
 }
 
