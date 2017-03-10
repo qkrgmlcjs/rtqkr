@@ -38,21 +38,25 @@ dataForm <- data.frame(datetime=NA,source=NA,rank=NA,keyword=NA)
 # dataForm <- dataForm[-1,]
 
 datetime <- as.POSIXlt(now()+9*60*60,tz="KST")
+if(month(datetime) %in% c(1,2,3)) {gsname <- paste0(year(datetime),"Q1")}
+if(month(datetime) %in% c(4,5,6)) {gsname <- paste0(year(datetime),"Q2")}
+if(month(datetime) %in% c(7,8,9)) {gsname <- paste0(year(datetime),"Q3")}
+if(month(datetime) %in% c(10,11,12)) {gsname <- paste0(year(datetime),"Q4")}
 
 ## check and create today's sheet.
-workSpace <- try(gs_title(paste0("rtqk_",as.Date(datetime) )))
+workSpace <- try(gs_title(paste0("rtqk_",gsname )))
 
 while(workSpace[1]=="Error in curl::curl_fetch_memory(url, handle = handle) : \n  Timeout was reached\n"){
   
-  workSpace <- try(gs_title(paste0("rtqk_",as.Date(datetime))))
+  workSpace <- try(gs_title(paste0("rtqk_",gsname)))
   Sys.sleep(0.3)
   
 }
 
 if(class(workSpace)[1]!="googlesheet"){
   if(grep("Error in gs_lookup",workSpace)==1) {
-    gs_new(title = paste0("rtqk_",as.Date(datetime)),input=dataForm)
-    workSpace <- try(gs_title(paste0("rtqk_", as.Date(datetime))))
+    gs_new(title = paste0("rtqk_",gsname),input=dataForm)
+    workSpace <- try(gs_title(paste0("rtqk_", gsname)))
   }
 }
 
