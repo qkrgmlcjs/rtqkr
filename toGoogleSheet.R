@@ -1,8 +1,11 @@
-## load packges
+## load packages
 
 if (!require("googlesheets")) {install.packages("googlesheets") }
 if (!require("httr")) {install.packages("httr") }
 if (!require("lubridate")) {install.packages("lubridate") }
+
+## data.frame options
+
 options(stringsAsFactors = F)
 
 ## load get data func
@@ -34,17 +37,22 @@ daum <-function(){
   return(daum)
 }
 
+## load slack web_hook url for report
+
+# web_hook = "https://hooks.slack.com/services/XXXXXXXXXXXXXXXXXXXX"
+# save(web_hook,file="web_hook.RData")
+load("/home/rstudio/realtimeQueryKeywordKr/web_hook.RData")
+
+## make form for googlesheet
+
 dataForm <- data.frame(datetime=NA,source=NA,rank=NA,keyword=NA)
-# dataForm <- dataForm[-1,]
+
+## save time for file title.
 
 datetime <- as.POSIXlt(now()+9*60*60,tz="KST")
 gsname   <- as.Date(datetime)
-# if(month(datetime) %in% c(1,2,3)) {gsname <- paste0(year(datetime),"Q1")}
-# if(month(datetime) %in% c(4,5,6)) {gsname <- paste0(year(datetime),"Q2")}
-# if(month(datetime) %in% c(7,8,9)) {gsname <- paste0(year(datetime),"Q3")}
-# if(month(datetime) %in% c(10,11,12)) {gsname <- paste0(year(datetime),"Q4")}
 
-## check and create today's sheet.
+## check and assign today's sheet.
 workSpace <- try(gs_title(paste0("rtqk_",gsname )))
 
 while(workSpace[1]=="Error in curl::curl_fetch_memory(url, handle = handle) : \n  Timeout was reached\n"){
@@ -53,6 +61,8 @@ while(workSpace[1]=="Error in curl::curl_fetch_memory(url, handle = handle) : \n
   Sys.sleep(0.3)
   
 }
+
+## if don't exist today's sheet, create, assign sheet and report to slack
 
 if(class(workSpace)[1]!="googlesheet"){
   if(grep("Error in gs_lookup",workSpace)==1) {
@@ -81,6 +91,8 @@ rtData <- rbind(data.frame(datetime = datetime, source= "daum",rank=1:10,keyword
                 data.frame(datetime = datetime, source= "naver",rank=1:20,keyword=naver()),
                 data.frame(datetime = datetime, source= "zum",rank=1:20,keyword=zum()))
 
+## upload datas
+
 for (i in 1:nrow(rtData)) {
   workSpace <- try(gs_add_row(ss=workSpace, input = (rtData[i,])))
   while(workSpace[1]=="Error in curl::curl_fetch_memory(url, handle = handle) : \n  Timeout was reached\n"){
@@ -92,9 +104,7 @@ for (i in 1:nrow(rtData)) {
 
 rm(rtData)
 
-# web_hook = "https://hooks.slack.com/services/XXXXXXXXXXXXXXXXXXXX"
-# save(web_hook,file="web_hook.RData")
-load("/home/rstudio/realtimeQueryKeywordKr/web_hook.RData")
+## report to slack
 
 if(i==50){
   cont = paste0(datetime,"의 데이터 업로드가 완료되었습니다.")
