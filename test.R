@@ -87,7 +87,7 @@ rtData <- rbind(data.frame(datetime = datetime, source= "daum",rank=1:10,keyword
 # loc<-chk_c$cell[length(chk_c$cell)]
 
 # rowNum<-as.numeric(substr(loc,2,nchar(loc)))+1
-rowNum<-hour(datetime)*50*60 + minute(datetime)*50 + 1
+rowNum<-hour(datetime)*50*60 + minute(datetime)*50 + 2
 chk_e<-try(gs_edit_cells(ss=workSpace,input = rtData,
                   col_names = F,anchor = paste0("A",rowNum)))
 

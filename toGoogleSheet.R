@@ -45,13 +45,6 @@ load("/home/rstudio/realtimeQueryKeywordKr/web_hook.RData")
 
 ## make form for googlesheet
 
-dataForm <- data.frame(datetime=NA,source=NA,rank=NA,keyword=NA)
-<<<<<<< HEAD
-=======
-
-## save time for file title.
->>>>>>> 065e790b8040bc2f698d37639058bfb9ff00d2b3
-
 datetime <- as.POSIXlt(now()+9*60*60,tz="KST")
 gsname   <- as.Date(datetime)
 
