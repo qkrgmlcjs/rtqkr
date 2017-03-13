@@ -34,31 +34,32 @@ daum <-function(){
   return(daum)
 }
 
-dataForm <- data.frame(datetime=NA,source=NA,rank=NA,keyword=NA)
+dataForm <- data.frame(datetime="",source="",rank="",keyword="")
 
 datetime <- as.POSIXlt(now()+9*60*60,tz="KST")
 gsname   <- as.Date(datetime)
+gsTitle  <- paste0("trtqk_",gsname)
 
 ## check and create today's sheet.
-workSpace <- try(gs_title(paste0("rtqk_",gsname )))
+workSpace <- try(gs_title(gsTitle))
 
 while(workSpace[1]=="Error in curl::curl_fetch_memory(url, handle = handle) : \n  Timeout was reached\n"){
   
-  workSpace <- try(gs_title(paste0("rtqk_",gsname)))
+  workSpace <- try(gs_title(gsTitle))
   Sys.sleep(0.1)
   
 }
 
 if(class(workSpace)[1]!="googlesheet"){
   if(grep("Error in gs_lookup",workSpace)==1) {
-    workSpace <- try(gs_new(title = paste0("rtqk_",gsname),input=dataForm))
+    workSpace <- try(gs_new(title = gsTitle,input=dataForm,row_extent = 73000))
     while(workSpace[1]=="Error in curl::curl_fetch_memory(url, handle = handle) : \n  Timeout was reached\n"){
-      workSpace <- try(gs_new(title = paste0("rtqk_",gsname),input=dataForm))
+      workSpace <- try(gs_new(title = gsTitle,input=dataForm,row_extent = 73000))
       Sys.sleep(0.1)
     }
-    workSpace <- try(gs_title(paste0("rtqk_", gsname)))
+    workSpace <- try(gs_title(gsTitle))
     while(workSpace[1]=="Error in curl::curl_fetch_memory(url, handle = handle) : \n  Timeout was reached\n"){
-      workSpace <- try(gs_title(paste0("rtqk_",gsname)))
+      workSpace <- try(gs_title(gsTitle))
       Sys.sleep(0.1)
     }
     cont = paste0("새 파일이 생성되었습니다. 공유 설정을 진행해 주세요.")
@@ -76,12 +77,23 @@ rtData <- rbind(data.frame(datetime = datetime, source= "daum",rank=1:10,keyword
                 data.frame(datetime = datetime, source= "naver",rank=1:20,keyword=naver()),
                 data.frame(datetime = datetime, source= "zum",rank=1:20,keyword=zum()))
 
-for (i in 1:nrow(rtData)) {
-  workSpace <- try(gs_add_row(ss=workSpace, input = (rtData[i,])))
-  while(workSpace[1]=="Error in curl::curl_fetch_memory(url, handle = handle) : \n  Timeout was reached\n"){
-    workSpace <- try(gs_add_row(ss=workSpace, input = (rtData[i,])))
-    Sys.sleep(0.01)
-  }
+# chk_c<-try(gs_read_cellfeed(ss=workSpace))
+# 
+# while(class(chk_c)[1]!="tbl_df"){
+#   chk_c<-try(gs_read_cellfeed(ss=workSpace))
+#   Sys.sleep(0.01)
+# }
+# 
+# loc<-chk_c$cell[length(chk_c$cell)]
+
+# rowNum<-as.numeric(substr(loc,2,nchar(loc)))+1
+rowNum<-hour(datetime)*50*60 + minute(datetime)*50 + 1
+chk_e<-try(gs_edit_cells(ss=workSpace,input = rtData,
+                  col_names = F,anchor = paste0("A",rowNum)))
+
+while(class(chk_e)[1]!="googlesheet"){
+  chk_e<-try(gs_edit_cells(ss=workSpace,input = rtData,
+                           col_names = F,anchor = paste0("A",rowNum)))
   Sys.sleep(0.01)
 }
 
@@ -91,12 +103,10 @@ rm(rtData)
 # save(web_hook,file="web_hook.RData")
 load("/home/rstudio/realtimeQueryKeywordKr/web_hook.RData")
 
-if(i==50){
-  cont = paste0(datetime,"의 데이터 업로드가 완료되었습니다.")
+cont = paste0(datetime,"의 업로드가 완료되었습니다.")
+report <- try(POST(web_hook,body=list(text=iconv(cont,to="UTF-8")),encode="json"))
+while(report[1]=="Error in curl::curl_fetch_memory(url, handle = handle) : \n  Timeout was reached\n"){
   report <- try(POST(web_hook,body=list(text=iconv(cont,to="UTF-8")),encode="json"))
-  while(report[1]=="Error in curl::curl_fetch_memory(url, handle = handle) : \n  Timeout was reached\n"){
-    report <- try(POST(web_hook,body=list(text=iconv(cont,to="UTF-8")),encode="json"))
-    Sys.sleep(0.3)
-  }
+  Sys.sleep(0.3)
 }
 
