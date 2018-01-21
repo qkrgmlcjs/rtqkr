@@ -4,10 +4,10 @@ library(stringi)
 library(rvest)
 
 melon  <- function(){
-  melon  <- readLines("http://www.melon.com",warn=F)
+  melon  <- readLines("http://www.melon.com/search/trend/index.htm",warn=F)
   Encoding(melon )<-"UTF-8"
-  melon  <- unlist(strsplit(melon ,"<"))
-  melon  <- unique(melon [grep("searchFrm",melon )])
+  melon  <- unlist(strsplit(melon ,">"))
+  melon  <- unique(melon [grep('class="ellipsis"',melon )])
   melon  <- paste0("<",melon )
   melon  <- gsub("<(/)?([a-zA-Z]*)(\\s[a-zA-Z]*=[^>]*)?(\\s)*(/)?>","",melon )
   return(melon )
